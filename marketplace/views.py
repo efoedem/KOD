@@ -109,40 +109,51 @@ def payment_page(request, listing_id):
     if not checkout_data:
         return redirect('order_checkout', listing_id=listing_id)
 
-    # 1. Force a log to see if we even reach the API call
-    print(f"DEBUG: Attempting to reach SvdPay API for Listing {listing_id}")
-
-    secret_key = getattr(settings, 'SDVPAY_SECRET_KEY', None)
+    # Prepare API Request
+    secret_key = settings.SDVPAY_SECRET_KEY
     url = "https://api.svdpay.com/api/v1/payments/initialize/"
-    headers = {"Authorization": f"Bearer {secret_key}", "Content-Type": "application/json"}
+    headers = {
+        "Authorization": f"Bearer {secret_key}",
+        "Content-Type": "application/json"
+    }
 
+    # Payload with required currency and clean amount formatting
     payload = {
         "amount": float(listing.price),
+        "currency": "GHS",  # CRITICAL: Added mandatory currency field
         "description": f"Payment for {listing.book.title}",
-        "customer_phone": checkout_data['phone_number'],
-        "customer_name": checkout_data['full_name'],
-        "email": checkout_data.get('email'),
+        "customer_phone": checkout_data.get('phone_number'),
+        "customer_name": checkout_data.get('full_name'),
+        "email": checkout_data.get('email', ''),
         "callback_url": "https://kod-psi.vercel.app/checkout-success/",
         "return_url": "https://kod-psi.vercel.app/checkout-success/"
     }
 
     checkout_url = None
 
-    # 2. Use a simpler request call to ensure it's not the 'json=' parameter
     try:
-        print("DEBUG: Sending POST request...")
-        response = requests.post(url, headers=headers, json=payload)
+        response = requests.post(url, headers=headers, json=payload, timeout=15)
 
-        # 3. Print the outcome
-        print(f"DEBUG: Response Status: {response.status_code}")
+        # Detailed logging for production troubleshooting
+        print(f"DEBUG: Status Code: {response.status_code}")
         print(f"DEBUG: Response Body: {response.text}")
 
         if response.status_code == 200:
-            checkout_url = response.json().get('data', {}).get('checkout_url')
-    except Exception as e:
-        print(f"CRITICAL ERROR: {str(e)}")
+            data = response.json()
+            checkout_url = data.get('data', {}).get('checkout_url')
+        else:
+            # This will log the specific validation error if the API rejects the payload
+            print(f"ERROR: SvdPay rejected request with code {response.status_code}: {response.text}")
 
-    return render(request, 'marketplace/payment.html', {'listing': listing, 'checkout_url': checkout_url})
+    except Exception as e:
+        print(f"CRITICAL: Connection/System Error: {str(e)}")
+
+    return render(request, 'marketplace/payment.html', {
+        'listing': listing,
+        'checkout_url': checkout_url
+    })
+
+
 def checkout_success(request):
     print("DEBUG: The checkout_success view was called!")
     reference = request.GET.get('ref') or request.GET.get('reference')
