@@ -81,8 +81,11 @@ def book_list(request):
     listings = Listing.objects.all()
     if query:
         listings = listings.filter(Q(book__title__icontains=query))
-    for listing in listings:
-        listing.formatted_price = f"GH₵{float(listing.price):,.2f}"
+
+    # REMOVE THIS FOR LOOP:
+    # for listing in listings:
+    #     listing.formatted_price = f"GH₵{float(listing.price):,.2f}"
+
     return render(request, 'marketplace/book_list.html', {'listings': listings, 'query': query})
 
 
