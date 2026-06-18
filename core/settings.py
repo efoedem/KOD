@@ -14,12 +14,16 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-c5*%asx%%!-i395&a7!
 DEBUG = True
 # settings.py
 
-ALLOWED_HOSTS = [
-    'kod-psi.vercel.app',  # Add this!
-    '127.0.0.1',           # Keep this for local development
-    'localhost',           # Keep this for local development
-]
+# settings.py
 
+ALLOWED_HOSTS = [
+    'kod-psi.vercel.app',
+    'kod-4xdf3k9ty-edemkofficial.vercel.app',
+    '.vercel.app',  # Adding this wildcard allows all subdomains
+    '127.0.0.1',
+    'localhost',
+    '*'
+]
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
