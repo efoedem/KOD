@@ -134,21 +134,23 @@ def payment_page(request, listing_id):
 
     checkout_url = None
     try:
-        response = requests.post(url, headers=headers, json=payload, timeout=10)
+        response = requests.post(url, headers=headers, json=payload, timeout=15)
 
-        # Log the full response to help us debug
-        print(f"DEBUG: SvdPay Status Code: {response.status_code}")
-        print(f"DEBUG: SvdPay Response: {response.text}")
+        # Log the raw response so we can see what SvdPay thinks of your request
+        print(f"DEBUG: SvdPay Request Status: {response.status_code}")
+        print(f"DEBUG: SvdPay Response Body: {response.text}")
 
         if response.status_code == 200:
-            checkout_url = response.json().get('data', {}).get('checkout_url')
+            data = response.json()
+            checkout_url = data.get('data', {}).get('checkout_url')
         else:
             checkout_url = None
+            print(f"ERROR: SvdPay rejected the request: {response.text}")
 
     except Exception as e:
+        # This catches connection errors (DNS, Timeout, etc)
         print(f"CRITICAL: Connection Error: {str(e)}")
         checkout_url = None
-
     return render(request, 'marketplace/payment.html', {
         'listing': listing,
         'checkout_url': checkout_url,
