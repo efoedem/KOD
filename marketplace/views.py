@@ -104,58 +104,45 @@ def order_checkout(request, listing_id):
 
 def payment_page(request, listing_id):
     listing = get_object_or_404(Listing, id=listing_id)
-
-    # Debug: Check price in logs
-    print(f"DEBUG: Processing payment for Listing ID {listing_id}, Price: {listing.price}")
-
     checkout_data = request.session.get('checkout_info')
+
     if not checkout_data:
         return redirect('order_checkout', listing_id=listing_id)
 
-    # Use getattr to avoid AttributeErrors
+    # 1. Force a log to see if we even reach the API call
+    print(f"DEBUG: Attempting to reach SvdPay API for Listing {listing_id}")
+
     secret_key = getattr(settings, 'SDVPAY_SECRET_KEY', None)
-
-    if not secret_key:
-        print("ERROR: SDVPAY_SECRET_KEY is missing in settings!")
-        return render(request, 'marketplace/error.html', {'message': 'Payment service is currently unavailable.'})
-
     url = "https://api.svdpay.com/api/v1/payments/initialize/"
     headers = {"Authorization": f"Bearer {secret_key}", "Content-Type": "application/json"}
 
     payload = {
         "amount": float(listing.price),
         "description": f"Payment for {listing.book.title}",
-        "customer_phone": checkout_data.get('phone_number'),
-        "customer_name": checkout_data.get('full_name'),
+        "customer_phone": checkout_data['phone_number'],
+        "customer_name": checkout_data['full_name'],
         "email": checkout_data.get('email'),
         "callback_url": "https://kod-psi.vercel.app/checkout-success/",
         "return_url": "https://kod-psi.vercel.app/checkout-success/"
     }
 
     checkout_url = None
-    try:
-        response = requests.post(url, headers=headers, json=payload, timeout=15)
 
-        # Log the raw response so we can see what SvdPay thinks of your request
-        print(f"DEBUG: SvdPay Request Status: {response.status_code}")
-        print(f"DEBUG: SvdPay Response Body: {response.text}")
+    # 2. Use a simpler request call to ensure it's not the 'json=' parameter
+    try:
+        print("DEBUG: Sending POST request...")
+        response = requests.post(url, headers=headers, json=payload)
+
+        # 3. Print the outcome
+        print(f"DEBUG: Response Status: {response.status_code}")
+        print(f"DEBUG: Response Body: {response.text}")
 
         if response.status_code == 200:
-            data = response.json()
-            checkout_url = data.get('data', {}).get('checkout_url')
-        else:
-            checkout_url = None
-            print(f"ERROR: SvdPay rejected the request: {response.text}")
-
+            checkout_url = response.json().get('data', {}).get('checkout_url')
     except Exception as e:
-        # This catches connection errors (DNS, Timeout, etc)
-        print(f"CRITICAL: Connection Error: {str(e)}")
-        checkout_url = None
-    return render(request, 'marketplace/payment.html', {
-        'listing': listing,
-        'checkout_url': checkout_url,
-        'amount': listing.price  # Pass this explicitly for the template
-    })
+        print(f"CRITICAL ERROR: {str(e)}")
+
+    return render(request, 'marketplace/payment.html', {'listing': listing, 'checkout_url': checkout_url})
 def checkout_success(request):
     print("DEBUG: The checkout_success view was called!")
     reference = request.GET.get('ref') or request.GET.get('reference')
