@@ -1,19 +1,11 @@
 from django.contrib import admin
-from import_export import resources, fields
 from import_export.admin import ImportExportModelAdmin
-from .models import Book, Listing, Order
+from .models import Book, Listing, Order, Profile  # Ensure all are imported
 
-# Define the custom resource for export
-class OrderResource(resources.ModelResource):
-    book_title = fields.Field(attribute='listing__book__title', column_name='Book Title')
-
-    class Meta:
-        model = Order
-        fields = ('book_title', 'buyer_name', 'phone_number', 'email', 'status', 'created_at')
-
+# Register your models here
 @admin.register(Book)
 class BookAdmin(admin.ModelAdmin):
-    list_display = ('title', 'author') # Add other fields as needed
+    list_display = ('title', 'author')
 
 @admin.register(Listing)
 class ListingAdmin(admin.ModelAdmin):
@@ -21,10 +13,13 @@ class ListingAdmin(admin.ModelAdmin):
 
 @admin.register(Order)
 class OrderAdmin(ImportExportModelAdmin):
-    resource_class = OrderResource
+    # If you have OrderResource defined, make sure it is defined ABOVE this class
     list_display = ('listing_title', 'buyer_name', 'phone_number', 'email', 'status', 'created_at')
     list_filter = ('listing__book__title', 'status', 'created_at')
 
     def listing_title(self, obj):
         return obj.listing.book.title
-    listing_title.short_description = "Book Title"
+
+@admin.register(Profile)
+class ProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'full_name')
