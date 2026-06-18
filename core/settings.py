@@ -12,7 +12,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-c5*%asx%%!-i395&a7!0kk4@8ld6^(_uva$z9$iwyg68-v%iyn')
 
 DEBUG = True
-ALLOWED_HOSTS = []
+# settings.py
+
+ALLOWED_HOSTS = [
+    'kod-psi.vercel.app',  # Add this!
+    '127.0.0.1',           # Keep this for local development
+    'localhost',           # Keep this for local development
+]
 
 # Application definition
 INSTALLED_APPS = [
