@@ -90,33 +90,48 @@ def order_checkout(request, listing_id):
 
 def payment_page(request, listing_id):
     listing = get_object_or_404(Listing, id=listing_id)
+
+    # Debug: Check price in logs
+    print(f"DEBUG: Processing payment for Listing ID {listing_id}, Price: {listing.price}")
+
     checkout_data = request.session.get('checkout_info')
     if not checkout_data:
         return redirect('order_checkout', listing_id=listing_id)
 
-    secret_key = settings.SDVPAY_SECRET_KEY
+    # Use getattr to avoid AttributeErrors
+    secret_key = getattr(settings, 'SDVPAY_SECRET_KEY', None)
+
+    if not secret_key:
+        print("ERROR: SDVPAY_SECRET_KEY is missing in settings!")
+        return render(request, 'marketplace/error.html', {'message': 'Payment service is currently unavailable.'})
+
     url = "https://api.svdpay.com/api/v1/payments/initialize/"
     headers = {"Authorization": f"Bearer {secret_key}", "Content-Type": "application/json"}
 
     payload = {
         "amount": float(listing.price),
         "description": f"Payment for {listing.book.title}",
-        "customer_phone": checkout_data['phone_number'],
-        "customer_name": checkout_data['full_name'],
+        "customer_phone": checkout_data.get('phone_number'),
+        "customer_name": checkout_data.get('full_name'),
         "email": checkout_data.get('email'),
         "callback_url": "https://prolonged-postal-levitate.ngrok-free.dev/checkout-success/"
     }
 
+    checkout_url = None
     try:
         response = requests.post(url, headers=headers, json=payload)
-        checkout_url = response.json().get('data', {}).get('checkout_url') if response.status_code == 200 else None
+        if response.status_code == 200:
+            checkout_url = response.json().get('data', {}).get('checkout_url')
+        else:
+            print(f"SvdPay API Error: {response.status_code} - {response.text}")
     except Exception as e:
-        print(f"Error: {e}")
-        checkout_url = None
+        print(f"Connection Error: {e}")
 
-    return render(request, 'marketplace/payment.html', {'listing': listing, 'checkout_url': checkout_url})
-
-
+    return render(request, 'marketplace/payment.html', {
+        'listing': listing,
+        'checkout_url': checkout_url,
+        'amount': listing.price  # Pass this explicitly for the template
+    })
 def checkout_success(request):
     print("DEBUG: The checkout_success view was called!")
     reference = request.GET.get('ref') or request.GET.get('reference')

@@ -11,10 +11,13 @@ class Book(models.Model):
     def __str__(self):
         return self.title
 
+from django.db import models
+from django.contrib.auth.models import User
+
 class Listing(models.Model):
     CONDITION_CHOICES = [('NEW', 'New'), ('GOOD', 'Good'), ('WORN', 'Worn')]
     seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name='listings')
-    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    book = models.ForeignKey('Book', on_delete=models.CASCADE) # Ensure 'Book' is defined
     condition = models.CharField(max_length=10, choices=CONDITION_CHOICES)
     price = models.DecimalField(max_digits=6, decimal_places=2)
     is_available = models.BooleanField(default=True)
@@ -24,6 +27,10 @@ class Listing(models.Model):
     def __str__(self):
         return f"{self.book.title} - {self.seller.username}"
 
+    @property
+    def formatted_price(self):
+        """Returns the price formatted as Ghana Cedis."""
+        return f"GH₵ {self.price}"
 class Order(models.Model):
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
     buyer_name = models.CharField(max_length=255)

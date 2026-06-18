@@ -10,20 +10,20 @@
 
                     <div class="bg-light p-3 rounded-3 mb-4">
                         <small class="text-uppercase text-muted">Amount Due</small>
-                        <h2 class="text-success fw-bold">{{ listing.formatted_price }}</h2>
+                        <h2 class="text-success fw-bold">{{ listing.price }}</h2>
+                    </div>
 
-                <div class="card-body">
-    {% if checkout_url %}
-        <a href="{{ checkout_url }}" class="btn btn-success btn-lg w-100 rounded-pill shadow-sm">
-            Proceed to Payment
-        </a>
-    {% else %}
-        <div class="alert alert-danger">
-            Unable to connect to payment gateway. Please try again later.
-        </div>
-        <a href="{% url 'order_checkout' listing.id %}" class="btn btn-secondary">Retry</a>
-    {% endif %}
-</div>
+                    {% if checkout_url %}
+                        <a href="{{ checkout_url }}" class="btn btn-success btn-lg w-100 rounded-pill shadow-sm">
+                            Proceed to Payment
+                        </a>
+                    {% else %}
+                        <div class="alert alert-danger">
+                            Unable to connect to payment gateway. Please try again later.
+                        </div>
+                        <a href="{% url 'order_checkout' listing.id %}" class="btn btn-secondary w-100 rounded-pill">Retry</a>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
