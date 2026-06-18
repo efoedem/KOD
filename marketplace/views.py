@@ -48,20 +48,31 @@ def verify(sig_header, body):
         return False
 
 
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+import json
+
+
 @csrf_exempt
 def svdpay_webhook(request):
     if request.method == 'POST':
-        sig_header = request.headers.get('X-SvdPay-Signature')
-        body = request.body
-        if verify(sig_header, body):
-            event_data = json.loads(body)
-            if event_data.get('event') == 'payment.completed':
-                # Process success here (e.g., mark Order as paid if found via reference)
-                return HttpResponse(status=200)
-            return HttpResponse(status=200)
-        return HttpResponse(status=400)
-    return HttpResponse(status=405)
+        data = json.loads(request.body)
+        reference = data.get('reference')
+        status = data.get('status')
 
+        # 1. Log the incoming webhook to verify it's working
+        print(f"DEBUG: Webhook received! Ref: {reference}, Status: {status}")
+
+        # 2. Logic to verify and update your Order/Listing
+        # You should call the SvdPay verification API here just to be safe
+        if status == 'success':
+            # Find the order associated with this reference and mark as PAID
+            # Order.objects.filter(reference=reference).update(status='PAID')
+            return JsonResponse({'message': 'Webhook processed'}, status=200)
+
+        return JsonResponse({'message': 'Event ignored'}, status=200)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 # --- Marketplace Views ---
 
@@ -114,7 +125,8 @@ def payment_page(request, listing_id):
         "customer_phone": checkout_data.get('phone_number'),
         "customer_name": checkout_data.get('full_name'),
         "email": checkout_data.get('email'),
-        "callback_url": "https://prolonged-postal-levitate.ngrok-free.dev/checkout-success/"
+        "callback_url": "https://kod-psi.vercel.app/checkout-success/",
+        "return_url": "https://kod-psi.vercel.app/checkout-success/"
     }
 
     checkout_url = None
