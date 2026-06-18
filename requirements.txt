@@ -12,3 +12,5 @@ sqlparse==0.5.5
 tablib==3.9.0
 tzdata==2026.2
 urllib3==2.7.0
+j-database-url
+psycopg2-binary
