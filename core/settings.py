@@ -14,8 +14,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY: Keep this secret in production!
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-c5*%asx%%!-i395&a7!0kk4@8ld6^(_uva$z9$iwyg68-v%iyn')
-
-DEBUG = False # Set to False for production
+SDVPAY_SECRET_KEY = os.getenv('SDVPAY_SECRET_KEY')
+DEBUG = True # Set to False for production
 
 ALLOWED_HOSTS = [
     'kod-psi.vercel.app',
@@ -114,6 +114,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
+#e to copy all static files for production
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
