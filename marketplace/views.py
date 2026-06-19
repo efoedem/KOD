@@ -117,16 +117,15 @@ def payment_page(request, listing_id):
         "Content-Type": "application/json"
     }
 
-    # Payload with required currency and clean amount formatting
     payload = {
         "amount": float(listing.price),
-        "currency": "GHS",  # CRITICAL: Added mandatory currency field
+        "currency": "GHS",
         "description": f"Payment for {listing.book.title}",
-        "customer_phone": checkout_data.get('phone_number'),
-        "customer_name": checkout_data.get('full_name'),
-        "email": checkout_data.get('email', ''),
+        "customer_phone": checkout_data['phone_number'],
+        "customer_name": checkout_data['full_name'],
         "callback_url": "https://kod-psi.vercel.app/checkout-success/",
-        "return_url": "https://kod-psi.vercel.app/checkout-success/"
+        "return_url": "https://kod-psi.vercel.app/checkout-success/",
+        "reference": str(uuid.uuid4())  # Generate a unique ID for every single request
     }
 
     checkout_url = None
