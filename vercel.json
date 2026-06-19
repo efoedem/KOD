@@ -3,14 +3,13 @@
     {
       "src": "core/wsgi.py",
       "use": "@vercel/python",
-      "config": {
-        "maxLambdaSize": "15mb",
-        "runtime": "python3.9"
-      }
+      "config": { "maxLambdaSize": "15mb" }
     }
   ],
+  "build": {
+    "cmd": "python manage.py collectstatic --noinput"
+  },
   "routes": [
-    { "src": "/static/(.*)", "dest": "/staticfiles/$1" },
     { "src": "/(.*)", "dest": "core/wsgi.py" }
   ]
 }
