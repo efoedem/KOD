@@ -4,8 +4,7 @@
       "src": "core/wsgi.py",
       "use": "@vercel/python",
       "config": {
-        "maxLambdaSize": "15mb",
-        "distDir": "staticfiles"
+        "maxLambdaSize": "15mb"
       }
     }
   ],

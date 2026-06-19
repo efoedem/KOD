@@ -17,3 +17,4 @@ cloudinary==1.42.0
 django-cloudinary-storage==0.3.0
 psycopg[binary]
 whitenoise
+gunicorn
