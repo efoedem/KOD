@@ -15,8 +15,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY: Keep this secret in production!
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-c5*%asx%%!-i395&a7!0kk4@8ld6^(_uva$z9$iwyg68-v%iyn')
 SDVPAY_SECRET_KEY = os.getenv('SDVPAY_SECRET_KEY')
-DEBUG = False # Set to False for production
-
+DEBUG = False
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 ALLOWED_HOSTS = [
     'kod-psi.vercel.app',
     'kod-4xdf3k9ty-edemkofficial.vercel.app',
@@ -25,6 +25,7 @@ ALLOWED_HOSTS = [
 
 # Application definition
 INSTALLED_APPS = [
+    'whitenoise.runserver_nostatic',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -36,16 +37,21 @@ INSTALLED_APPS = [
     'cloudinary',
     'marketplace',
 ]
+
 # Static and Media settings
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = '/media/'
 
-# Use WhiteNoise for static files (Admin CSS, etc.)
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
-# Use Cloudinary for user-uploaded media files
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+# Use WhiteNoise for static files and Cloudinary for media
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 # Cloudinary configuration
 CLOUDINARY_STORAGE = {
@@ -63,7 +69,6 @@ cloudinary.config(
 # Middleware configuration
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    # WhiteNoise must come right after SecurityMiddleware
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -72,7 +77,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
 
 ROOT_URLCONF = 'core.urls'
 
@@ -92,6 +96,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'core.wsgi.application'
+
 # Database configuration
 DATABASE_URL = os.environ.get('POSTGRES_URL')
 
@@ -101,18 +106,17 @@ if DATABASE_URL:
             default=DATABASE_URL,
             conn_max_age=600,
             ssl_require=True,
-            # Explicitly force the use of the modern psycopg driver
             engine='django.db.backends.postgresql',
         )
     }
 else:
-    # Fallback to local SQLite for development
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
+
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -125,10 +129,15 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-
+# Email settings
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+
+# Security settings
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
