@@ -15,11 +15,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY: Keep this secret in production!
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-c5*%asx%%!-i395&a7!0kk4@8ld6^(_uva$z9$iwyg68-v%iyn')
 SDVPAY_SECRET_KEY = os.getenv('SDVPAY_SECRET_KEY')
-DEBUG = False
+DEBUG = True
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
     'kod-psi.vercel.app',
-    'kod-4xdf3k9ty-edemkofficial.vercel.app',
     '.vercel.app',
 ]
 
