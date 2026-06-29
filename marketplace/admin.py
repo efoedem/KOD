@@ -33,14 +33,32 @@ class BookAdmin(admin.ModelAdmin):
             obj.added_by = request.user
         super().save_model(request, obj, form, change)
 
+
+from django.contrib import admin
+from .models import Listing
+
+
+@admin.register(Listing, site=marketplace_admin)  # Ensure this registers to your custom site
 class ListingAdmin(admin.ModelAdmin):
-    list_display = ('book', 'price', 'condition', 'is_available')
+    # 'seller' is removed from fields/list_display if you want to hide it entirely
+    list_display = ('book', 'price', 'condition', 'is_available', 'created_at')
+
+    # This prevents the seller field from appearing in the Add/Edit form
+    exclude = ('seller',)
+
+    def save_model(self, request, obj, form, change):
+        # Automatically assign the logged-in user as the seller
+        if not obj.pk:
+            obj.seller = request.user
+        super().save_model(request, obj, form, change)
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
+        # Superusers can see all, managers only see their own listings
         if request.user.is_superuser:
             return qs
-        return qs.filter(book__added_by=request.user)
+        return qs.filter(seller=request.user)
+
 class OrderAdmin(ImportExportModelAdmin):
     list_display = ('listing_title', 'buyer_name', 'phone_number', 'email', 'status', 'created_at')
     list_filter = ('listing__book__title', 'status', 'created_at')
