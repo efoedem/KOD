@@ -53,7 +53,6 @@ class ListingAdmin(admin.ModelAdmin):
             # Only show books added by the current user
             kwargs["queryset"] = Book.objects.filter(added_by=request.user)
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
-
 @admin.register(Order, site=marketplace_admin)
 class OrderAdmin(ImportExportModelAdmin):
     list_display = ('listing_title', 'buyer_name', 'phone_number', 'email', 'status', 'created_at')
@@ -62,6 +61,13 @@ class OrderAdmin(ImportExportModelAdmin):
     def listing_title(self, obj):
         return obj.listing.book.title
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        # Superusers can see all orders
+        if request.user.is_superuser:
+            return qs
+        # Filter orders where the book associated with the listing was added by the current user
+        return qs.filter(listing__book__added_by=request.user)
 @admin.register(Profile, site=marketplace_admin)
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'full_name')
