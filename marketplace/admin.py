@@ -8,12 +8,17 @@ class MarketplaceAdminSite(admin.AdminSite):
     site_title = 'Marketplace Admin'
     index_title = 'Marketplace Management'
 
+    # This allows any user with "Staff" status to log into this admin panel
+    # without requiring them to be a Superuser.
+    def has_permission(self, request):
+        return request.user.is_active and request.user.is_staff
+
 # 2. Instantiate the custom site
 marketplace_admin = MarketplaceAdminSite(name='marketplace_admin')
 
-# 3. Define Admin Classes (Remove @admin.register decorators)
+# 3. Define Admin Classes
 class BookAdmin(admin.ModelAdmin):
-    list_display = ('title')
+    list_display = ('title', 'author')
 
 class ListingAdmin(admin.ModelAdmin):
     list_display = ('book', 'price', 'condition', 'is_available')
