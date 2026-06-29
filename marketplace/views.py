@@ -108,6 +108,9 @@ def payment_page(request, listing_id):
     listing = get_object_or_404(Listing, id=listing_id)
     checkout_data = request.session.get('checkout_info')
 
+    print(f"DEBUG: RAW SESSION DATA: {checkout_data}")
+    print(f"DEBUG: QUANTITY RETRIEVED: {checkout_data.get('quantity')}")
+
     # 1. Validate session data exists
     if not checkout_data:
         return redirect('order_checkout', listing_id=listing_id)

@@ -5,4 +5,4 @@ class CheckoutForm(forms.Form):
     full_name = forms.CharField(max_length=255)
     phone_number = forms.CharField(max_length=15)
     email = forms.EmailField(required=False) # Optional
-    quantity = forms.IntegerField(min_value=1)
+    quantity = forms.IntegerField(min_value=1, initial=1)  # Ensure this is present
