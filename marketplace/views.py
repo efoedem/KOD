@@ -91,80 +91,50 @@ def book_list(request):
 
 def order_checkout(request, listing_id):
     listing = get_object_or_404(Listing, id=listing_id)
+
     if request.method == 'POST':
         form = CheckoutForm(request.POST)
         if form.is_valid():
-            data = form.cleaned_data
-            data['quantity'] = int(request.POST.get('quantity', 1))
+            # 1. Save data to session
             request.session['checkout_info'] = form.cleaned_data
             request.session['listing_id'] = listing.id
-            return redirect('payment_page', listing_id=listing.id)
+
+            # 2. Perform API Initialization here immediately
+            quantity = int(form.cleaned_data.get('quantity', 1))
+            total_amount = float(listing.price) * quantity
+
+            payload = {
+                "amount": total_amount,
+                "currency": "GHS",
+                "description": f"Payment for {quantity}x {listing.book.title}",
+                "customer_phone": form.cleaned_data['phone_number'],
+                "customer_name": form.cleaned_data['full_name'],
+                "callback_url": "https://kod-psi.vercel.app/checkout-success/",
+                "return_url": "https://kod-psi.vercel.app/checkout-success/",
+                "reference": str(uuid.uuid4())
+            }
+
+            headers = {
+                "Authorization": f"Bearer {settings.SDVPAY_SECRET_KEY}",
+                "Content-Type": "application/json"
+            }
+
+            try:
+                response = requests.post("https://api.svdpay.com/api/v1/payments/initialize/",
+                                         headers=headers, json=payload, timeout=15)
+
+                if response.status_code == 200:
+                    checkout_url = response.json().get('data', {}).get('checkout_url')
+                    return redirect(checkout_url)  # Instant redirect
+                else:
+                    messages.error(request, "Payment initialization failed. Please try again.")
+            except Exception as e:
+                messages.error(request, "A connection error occurred.")
+
     else:
         form = CheckoutForm()
+
     return render(request, 'marketplace/checkout.html', {'form': form, 'listing': listing})
-
-
-def payment_page(request, listing_id):
-    listing = get_object_or_404(Listing, id=listing_id)
-    checkout_data = request.session.get('checkout_info')
-
-    print(f"DEBUG: RAW SESSION DATA: {checkout_data}")
-    print(f"DEBUG: QUANTITY RETRIEVED: {checkout_data.get('quantity')}")
-
-    # 1. Validate session data exists
-    if not checkout_data:
-        return redirect('order_checkout', listing_id=listing_id)
-
-    # 2. Calculate dynamic total
-    quantity = int(checkout_data.get('quantity', 1))
-    total_amount = float(listing.price) * quantity
-
-    # 3. Prepare the API request
-    secret_key = settings.SDVPAY_SECRET_KEY
-    url = "https://api.svdpay.com/api/v1/payments/initialize/"
-    headers = {
-        "Authorization": f"Bearer {secret_key}",
-        "Content-Type": "application/json"
-    }
-
-    # Consolidated payload (Quantity and Total Amount included)
-    payload = {
-        "amount": total_amount,
-        "currency": "GHS",
-        "description": f"Payment for {quantity}x {listing.book.title}",
-        "customer_phone": checkout_data['phone_number'],
-        "customer_name": checkout_data['full_name'],
-        "callback_url": "https://kod-psi.vercel.app/checkout-success/",
-        "return_url": "https://kod-psi.vercel.app/checkout-success/",
-        "reference": str(uuid.uuid4())
-    }
-
-    checkout_url = None
-
-    # 4. Execute Request
-    try:
-        response = requests.post(url, headers=headers, json=payload, timeout=15)
-
-        # Logging for production troubleshooting
-        print(f"DEBUG: Status Code: {response.status_code}")
-        print(f"DEBUG: Response Body: {response.text}")
-
-        if response.status_code == 200:
-            data = response.json()
-            # Ensure path to checkout_url matches your provider's JSON structure
-            checkout_url = data.get('data', {}).get('checkout_url')
-        else:
-            print(f"ERROR: SvdPay rejected request: {response.text}")
-
-    except Exception as e:
-        print(f"CRITICAL: Connection/System Error: {str(e)}")
-
-    return render(request, 'marketplace/payment.html', {
-        'listing': listing,
-        'checkout_url': checkout_url,
-        'quantity': quantity ,# Passed to template if you want to display it
-        'total_amount': total_amount
-    })
 
 
 def checkout_success(request):

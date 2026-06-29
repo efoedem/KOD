@@ -7,8 +7,6 @@ urlpatterns = [
     # 1. Shows the form for user details
     path('checkout/<int:listing_id>/', views.order_checkout, name='order_checkout'),
 
-    # 2. Shows the payment option/gateway
-    path('payment/<int:listing_id>/', views.payment_page, name='payment_page'),
 
     # 3. Final confirmation
     path('success/', views.checkout_success, name='checkout_success'),
