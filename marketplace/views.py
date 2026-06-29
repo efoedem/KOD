@@ -162,7 +162,8 @@ def payment_page(request, listing_id):
     return render(request, 'marketplace/payment.html', {
         'listing': listing,
         'checkout_url': checkout_url,
-        'quantity': quantity # Passed to template if you want to display it
+        'quantity': quantity ,# Passed to template if you want to display it
+        'total_amount': total_amount
     })
 
 

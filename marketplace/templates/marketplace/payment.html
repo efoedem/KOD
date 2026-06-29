@@ -6,11 +6,11 @@
             <div class="card shadow-lg border-0 rounded-4 p-4">
                 <div class="card-body">
                     <h3 class="fw-bold mb-3 text-dark">Secure Payment</h3>
-                    <p class="text-muted mb-4">Pay for: <strong>{{ listing.book.title }}</strong></p>
+                    <p class="text-muted mb-4">Pay for: <strong>{{ quantity }}x {{ listing.book.title }}</strong></p>
 
                     <div class="bg-light p-3 rounded-3 mb-4">
                         <small class="text-uppercase text-muted">Amount Due</small>
-                        <h2 class="text-success fw-bold">{{ listing.price }}</h2>
+                        <h2 class="text-success fw-bold">GH₵{{ total_amount|floatformat:2 }}</h2>
                     </div>
 
                     {% if checkout_url %}
