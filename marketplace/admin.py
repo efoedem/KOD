@@ -8,16 +8,16 @@ class MarketplaceAdminSite(admin.AdminSite):
     site_title = 'Marketplace Admin'
     index_title = 'Marketplace Management'
 
-    # This allows any user with "Staff" status to log into this admin panel
-    # without requiring them to be a Superuser.
     def has_permission(self, request):
         return request.user.is_active and request.user.is_staff
 
 # 2. Instantiate the custom site
 marketplace_admin = MarketplaceAdminSite(name='marketplace_admin')
 
-# 3. Define Admin Classes
-# 3. Define Admin Classes
+# 3. Define and Register all models using decorators
+# This approach ensures models are registered exactly once to the custom site.
+
+@admin.register(Book, site=marketplace_admin)
 class BookAdmin(admin.ModelAdmin):
     list_display = ('title', 'author', 'added_by')
 
@@ -27,38 +27,28 @@ class BookAdmin(admin.ModelAdmin):
             return qs
         return qs.filter(added_by=request.user)
 
-    # Indent this method so it belongs to BookAdmin
     def save_model(self, request, obj, form, change):
-        if not obj.pk:  # Only set on creation
+        if not obj.pk:
             obj.added_by = request.user
         super().save_model(request, obj, form, change)
 
-
-from django.contrib import admin
-from .models import Listing
-
-
-@admin.register(Listing, site=marketplace_admin)  # Ensure this registers to your custom site
+@admin.register(Listing, site=marketplace_admin)
 class ListingAdmin(admin.ModelAdmin):
-    # 'seller' is removed from fields/list_display if you want to hide it entirely
     list_display = ('book', 'price', 'condition', 'is_available', 'created_at')
-
-    # This prevents the seller field from appearing in the Add/Edit form
     exclude = ('seller',)
 
     def save_model(self, request, obj, form, change):
-        # Automatically assign the logged-in user as the seller
         if not obj.pk:
             obj.seller = request.user
         super().save_model(request, obj, form, change)
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        # Superusers can see all, managers only see their own listings
         if request.user.is_superuser:
             return qs
         return qs.filter(seller=request.user)
 
+@admin.register(Order, site=marketplace_admin)
 class OrderAdmin(ImportExportModelAdmin):
     list_display = ('listing_title', 'buyer_name', 'phone_number', 'email', 'status', 'created_at')
     list_filter = ('listing__book__title', 'status', 'created_at')
@@ -66,11 +56,6 @@ class OrderAdmin(ImportExportModelAdmin):
     def listing_title(self, obj):
         return obj.listing.book.title
 
+@admin.register(Profile, site=marketplace_admin)
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'full_name')
-
-# 4. Register models to the custom site
-marketplace_admin.register(Book, BookAdmin)
-marketplace_admin.register(Listing, ListingAdmin)
-marketplace_admin.register(Order, OrderAdmin)
-marketplace_admin.register(Profile, ProfileAdmin)
