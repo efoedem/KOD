@@ -48,6 +48,12 @@ class ListingAdmin(admin.ModelAdmin):
             return qs
         return qs.filter(seller=request.user)
 
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "book" and not request.user.is_superuser:
+            # Only show books added by the current user
+            kwargs["queryset"] = Book.objects.filter(added_by=request.user)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
 @admin.register(Order, site=marketplace_admin)
 class OrderAdmin(ImportExportModelAdmin):
     list_display = ('listing_title', 'buyer_name', 'phone_number', 'email', 'status', 'created_at')
