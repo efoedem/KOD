@@ -17,12 +17,30 @@ class MarketplaceAdminSite(admin.AdminSite):
 marketplace_admin = MarketplaceAdminSite(name='marketplace_admin')
 
 # 3. Define Admin Classes
+# 3. Define Admin Classes
 class BookAdmin(admin.ModelAdmin):
-    list_display = ('title', 'author')
+    list_display = ('title', 'author', 'added_by')
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(added_by=request.user)
+
+    # Indent this method so it belongs to BookAdmin
+    def save_model(self, request, obj, form, change):
+        if not obj.pk:  # Only set on creation
+            obj.added_by = request.user
+        super().save_model(request, obj, form, change)
 
 class ListingAdmin(admin.ModelAdmin):
     list_display = ('book', 'price', 'condition', 'is_available')
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(book__added_by=request.user)
 class OrderAdmin(ImportExportModelAdmin):
     list_display = ('listing_title', 'buyer_name', 'phone_number', 'email', 'status', 'created_at')
     list_filter = ('listing__book__title', 'status', 'created_at')
