@@ -1,3 +1,4 @@
+# marketplace/urls.py
 from django.urls import path
 from . import views
 
@@ -7,11 +8,9 @@ urlpatterns = [
     # 1. Shows the form for user details
     path('checkout/<int:listing_id>/', views.order_checkout, name='order_checkout'),
 
-
-    # 3. Final confirmation
-    path('success/', views.checkout_success, name='checkout_success'),
+    # 2. Final confirmation (Removed the duplicate 'success/' path)
     path('checkout-success/', views.checkout_success, name='checkout_success'),
-# marketplace/urls.py
-    path('webhook/svdpay/', views.svdpay_webhook, name='svdpay_webhook'),
 
+    # 3. SvdPay Webhook
+    path('webhook/svdpay/', views.svdpay_webhook, name='svdpay_webhook'),
 ]

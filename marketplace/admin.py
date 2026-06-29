@@ -1,25 +1,35 @@
 from django.contrib import admin
 from import_export.admin import ImportExportModelAdmin
-from .models import Book, Listing, Order, Profile  # Ensure all are imported
+from .models import Book, Listing, Order, Profile
 
-# Register your models here
-@admin.register(Book)
+# 1. Define the custom Admin Site
+class MarketplaceAdminSite(admin.AdminSite):
+    site_header = 'Marketplace Administration'
+    site_title = 'Marketplace Admin'
+    index_title = 'Marketplace Management'
+
+# 2. Instantiate the custom site
+marketplace_admin = MarketplaceAdminSite(name='marketplace_admin')
+
+# 3. Define Admin Classes (Remove @admin.register decorators)
 class BookAdmin(admin.ModelAdmin):
-    list_display = ('title', 'author')
+    list_display = ('title')
 
-@admin.register(Listing)
 class ListingAdmin(admin.ModelAdmin):
     list_display = ('book', 'price', 'condition', 'is_available')
 
-@admin.register(Order)
 class OrderAdmin(ImportExportModelAdmin):
-    # If you have OrderResource defined, make sure it is defined ABOVE this class
     list_display = ('listing_title', 'buyer_name', 'phone_number', 'email', 'status', 'created_at')
     list_filter = ('listing__book__title', 'status', 'created_at')
 
     def listing_title(self, obj):
         return obj.listing.book.title
 
-@admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'full_name')
+
+# 4. Register models to the custom site
+marketplace_admin.register(Book, BookAdmin)
+marketplace_admin.register(Listing, ListingAdmin)
+marketplace_admin.register(Order, OrderAdmin)
+marketplace_admin.register(Profile, ProfileAdmin)
