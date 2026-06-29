@@ -38,10 +38,11 @@ class Order(models.Model):
     email = models.EmailField()
     status = models.CharField(max_length=20, default='PENDING')
     created_at = models.DateTimeField(auto_now_add=True)
+    # Add this field
+    quantity = models.PositiveIntegerField(default=1)
 
     def __str__(self):
-        # Update this to use the new fields instead of 'self.buyer'
-        return f"Order for {self.listing.book.title} by {self.buyer_name}"
+        return f"{self.quantity}x {self.listing.book.title} by {self.buyer_name}"
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

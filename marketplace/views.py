@@ -94,6 +94,8 @@ def order_checkout(request, listing_id):
     if request.method == 'POST':
         form = CheckoutForm(request.POST)
         if form.is_valid():
+            data = form.cleaned_data
+            data['quantity'] = int(request.POST.get('quantity', 1))
             request.session['checkout_info'] = form.cleaned_data
             request.session['listing_id'] = listing.id
             return redirect('payment_page', listing_id=listing.id)
@@ -106,10 +108,15 @@ def payment_page(request, listing_id):
     listing = get_object_or_404(Listing, id=listing_id)
     checkout_data = request.session.get('checkout_info')
 
+    # 1. Validate session data exists
     if not checkout_data:
         return redirect('order_checkout', listing_id=listing_id)
 
-    # Prepare API Request
+    # 2. Calculate dynamic total
+    quantity = int(checkout_data.get('quantity', 1))
+    total_amount = float(listing.price) * quantity
+
+    # 3. Prepare the API request
     secret_key = settings.SDVPAY_SECRET_KEY
     url = "https://api.svdpay.com/api/v1/payments/initialize/"
     headers = {
@@ -117,39 +124,42 @@ def payment_page(request, listing_id):
         "Content-Type": "application/json"
     }
 
+    # Consolidated payload (Quantity and Total Amount included)
     payload = {
-        "amount": float(listing.price),
+        "amount": total_amount,
         "currency": "GHS",
-        "description": f"Payment for {listing.book.title}",
+        "description": f"Payment for {quantity}x {listing.book.title}",
         "customer_phone": checkout_data['phone_number'],
         "customer_name": checkout_data['full_name'],
         "callback_url": "https://kod-psi.vercel.app/checkout-success/",
         "return_url": "https://kod-psi.vercel.app/checkout-success/",
-        "reference": str(uuid.uuid4())  # Generate a unique ID for every single request
+        "reference": str(uuid.uuid4())
     }
 
     checkout_url = None
 
+    # 4. Execute Request
     try:
         response = requests.post(url, headers=headers, json=payload, timeout=15)
 
-        # Detailed logging for production troubleshooting
+        # Logging for production troubleshooting
         print(f"DEBUG: Status Code: {response.status_code}")
         print(f"DEBUG: Response Body: {response.text}")
 
         if response.status_code == 200:
             data = response.json()
+            # Ensure path to checkout_url matches your provider's JSON structure
             checkout_url = data.get('data', {}).get('checkout_url')
         else:
-            # This will log the specific validation error if the API rejects the payload
-            print(f"ERROR: SvdPay rejected request with code {response.status_code}: {response.text}")
+            print(f"ERROR: SvdPay rejected request: {response.text}")
 
     except Exception as e:
         print(f"CRITICAL: Connection/System Error: {str(e)}")
 
     return render(request, 'marketplace/payment.html', {
         'listing': listing,
-        'checkout_url': checkout_url
+        'checkout_url': checkout_url,
+        'quantity': quantity # Passed to template if you want to display it
     })
 
 
@@ -166,18 +176,34 @@ def checkout_success(request):
     url = f"https://api.svdpay.com/api/v1/payments/{reference}/verify/"
     headers = {"Authorization": f"Bearer {settings.SDVPAY_SECRET_KEY}"}
 
-    response = requests.get(url, headers=headers).json()
+    try:
+        response = requests.get(url, headers=headers).json()
+    except Exception as e:
+        print(f"ERROR: Verification request failed: {e}")
+        return render(request, 'marketplace/failed.html', {'error': 'Verification request failed.'})
 
     if response.get('status') in [True, 'success']:
         listing = get_object_or_404(Listing, id=listing_id)
+
+        # Create order with the quantity from the session
         order = Order.objects.create(
-            listing=listing, buyer_name=checkout_data['full_name'],
-            phone_number=checkout_data['phone_number'], email=checkout_data.get('email', ''),
+            listing=listing,
+            buyer_name=checkout_data['full_name'],
+            phone_number=checkout_data['phone_number'],
+            email=checkout_data.get('email', ''),
+            quantity=checkout_data.get('quantity', 1),  # Added quantity here
             status='PAID'
         )
+
         # Send Email
-        send_mail('Order Confirmation', f"Success! Ref: {reference}", settings.EMAIL_HOST_USER, [order.email])
-        request.session.flush()  # Clear everything
+        send_mail(
+            'Order Confirmation',
+            f"Success! You ordered {order.quantity} copy/copies. Ref: {reference}",
+            settings.EMAIL_HOST_USER,
+            [order.email]
+        )
+
+        request.session.flush()  # Clear everything after success
         return render(request, 'marketplace/success.html', {'order': order})
 
     return render(request, 'marketplace/failed.html', {'error': 'Verification failed.'})
