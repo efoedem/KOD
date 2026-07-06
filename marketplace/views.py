@@ -79,16 +79,18 @@ def svdpay_webhook(request):
 
 def book_list(request):
     query = request.GET.get('q')
-    listings = Listing.objects.all()
+
+    # Start with all available listings
+    listings = Listing.objects.filter(is_available=True)
+
+    # Filter by search query if provided
     if query:
-        listings = listings.filter(Q(book__title__icontains=query))
+        listings = listings.filter(book__title__icontains=query)
 
-    # REMOVE THIS FOR LOOP:
-    # for listing in listings:
-    #     listing.formatted_price = f"GH₵{float(listing.price):,.2f}"
-
-    return render(request, 'marketplace/book_list.html', {'listings': listings, 'query': query})
-
+    return render(request, 'marketplace/book_list.html', {
+        'listings': listings,
+        'query': query
+    })
 
 def order_checkout(request, listing_id):
     listing = get_object_or_404(Listing, id=listing_id)
