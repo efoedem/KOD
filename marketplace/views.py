@@ -5,16 +5,15 @@ import json
 import hmac
 import hashlib
 import time
-from django.shortcuts import render, redirect, get_object_or_404
-from django.core.mail import send_mail
-from django.conf import settings
-from django.db.models import Q
 from django.contrib import messages
-from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse
-
-from .models import Listing, Order
 from .forms import CheckoutForm
+import requests
+import os
+from django.shortcuts import render, redirect, get_object_or_404
+from django.conf import settings
+from django.core.mail import send_mail
+from twilio.rest import Client
+from .models import Order, Listing
 
 
 
@@ -146,7 +145,7 @@ def order_checkout(request, listing_id):
 
 
 def checkout_success(request):
-    print("DEBUG: The checkout_success view was called!")
+    # 1. Get transaction details from request/session
     reference = request.GET.get('ref') or request.GET.get('reference')
     listing_id = request.session.get('listing_id')
     checkout_data = request.session.get('checkout_info')
@@ -154,38 +153,58 @@ def checkout_success(request):
     if not reference or not listing_id or not checkout_data:
         return redirect('book_list')
 
-    # Verification Logic
+    # 2. Payment Verification Logic
     url = f"https://api.svdpay.com/api/v1/payments/{reference}/verify/"
     headers = {"Authorization": f"Bearer {settings.SDVPAY_SECRET_KEY}"}
 
     try:
         response = requests.get(url, headers=headers).json()
     except Exception as e:
-        print(f"ERROR: Verification request failed: {e}")
-        return render(request, 'marketplace/failed.html', {'error': 'Verification request failed.'})
+        return render(request, 'marketplace/failed.html', {'error': 'Verification connection failed.'})
 
     if response.get('status') in [True, 'success']:
+        # 3. Create the Order
         listing = get_object_or_404(Listing, id=listing_id)
-
-        # Create order with the quantity from the session
         order = Order.objects.create(
             listing=listing,
             buyer_name=checkout_data['full_name'],
             phone_number=checkout_data['phone_number'],
             email=checkout_data.get('email', ''),
-            quantity=checkout_data.get('quantity', 1),  # Added quantity here
+            quantity=checkout_data.get('quantity', 1),
             status='PAID'
         )
 
-        # Send Email
-        send_mail(
-            'Order Confirmation',
-            f"Success! You ordered {order.quantity} copy/copies. Ref: {reference}",
-            settings.EMAIL_HOST_USER,
-            [order.email]
-        )
+        # 4. Send Email Confirmation
+        try:
+            send_mail(
+                'Order Confirmation',
+                f"Success! You ordered {order.quantity} copy/copies. Ref: {reference}",
+                settings.EMAIL_HOST_USER,
+                [order.email]
+            )
+        except Exception as e:
+            print(f"Email failed: {e}")
 
-        request.session.flush()  # Clear everything after success
+        # 5. Trigger WhatsApp Notification to Seller
+        try:
+            account_sid = os.environ.get('TWILIO_ACCOUNT_SID')
+            auth_token = os.environ.get('TWILIO_AUTH_TOKEN')
+            from_number = 'whatsapp:' + os.environ.get('TWILIO_PHONE_NUMBER')
+            # Ensure seller has a profile and a phone number
+            seller_phone = order.listing.seller.profile.phone_number
+            to_number = 'whatsapp:' + seller_phone
+
+            client = Client(account_sid, auth_token)
+            client.messages.create(
+                body=f"✅ New Order! {order.buyer_name} purchased {order.quantity} x '{order.listing.book.title}'. Order ID: {order.id}.",
+                from_=from_number,
+                to=to_number
+            )
+        except Exception as e:
+            print(f"WhatsApp notification failed: {e}")
+
+        # 6. Cleanup and Finalize
+        request.session.flush()
         return render(request, 'marketplace/success.html', {'order': order})
 
-    return render(request, 'marketplace/failed.html', {'error': 'Verification failed.'})
+    return render(request, 'marketplace/failed.html', {'error': 'Payment verification failed.'})
