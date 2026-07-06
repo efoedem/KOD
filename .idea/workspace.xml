@@ -5,7 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d212c1d6-f8da-4a86-bd17-36e8c54d63f8" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/marketplace/templates/marketplace/book_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/marketplace/templates/marketplace/book_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
