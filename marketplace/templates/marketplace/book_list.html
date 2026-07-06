@@ -8,7 +8,7 @@
             <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden">
                 <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
                     {% if listing.image %}
-                        <img src="{{ listing.image.url }}" class="img-fluid" style="width: 100%; height: 100%; object-fit: cover;" alt="{{ listing.book.title }}">
+                        <img src="{{ listing.image.url }}" class="card-img-top" alt="{{ listing.book.title }}">
                     {% else %}
                         <div class="text-muted text-center"><i class="bi bi-book fs-1"></i></div>
                     {% endif %}

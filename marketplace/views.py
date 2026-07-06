@@ -96,12 +96,17 @@ def order_checkout(request, listing_id):
     if request.method == 'POST':
         form = CheckoutForm(request.POST)
         if form.is_valid():
-            # 1. Save data to session
+            # Extract and validate quantity
+            quantity = form.cleaned_data.get('quantity', 1)
+            if quantity < 1:
+                messages.error(request, "Please enter a valid quantity of at least 1.")
+                return render(request, 'marketplace/checkout.html', {'form': form, 'listing': listing})
+
+            # Save data to session
             request.session['checkout_info'] = form.cleaned_data
             request.session['listing_id'] = listing.id
 
-            # 2. Perform API Initialization here immediately
-            quantity = int(form.cleaned_data.get('quantity', 1))
+            # Calculate total based on dynamic quantity
             total_amount = float(listing.price) * quantity
 
             payload = {
