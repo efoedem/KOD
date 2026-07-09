@@ -69,13 +69,15 @@ def order_checkout(request, listing_id):
             request.session['checkout_info'] = {**form.cleaned_data, 'phone_number': phone}
             request.session['listing_id'] = listing.id
 
+           
             payload = {
                 "amount": float(listing.price) * quantity,
                 "currency": "GHS",
                 "description": f"Payment for {quantity}x {listing.book.title}",
-                "customer_phone": phone,
+                "customer_phone": form.cleaned_data['phone_number'],
                 "customer_name": form.cleaned_data['full_name'],
-                "callback_url": "https://kod-psi.vercel.app/checkout-success/",
+                "callback_url": "https://shellboks.app/checkout-success/",
+                "return_url": "https://shellboks.app/checkout-success/",  # Ensure this is here
                 "reference": str(uuid.uuid4())
             }
 
