@@ -22,6 +22,8 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     'kod-psi.vercel.app',
     '.vercel.app',
+    'shellbooks.app',
+    'www.shellbooks.app',
 ]
 
 # Application definition
