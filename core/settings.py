@@ -18,12 +18,12 @@ SDVPAY_SECRET_KEY = os.getenv('SDVPAY_SECRET_KEY')
 DEBUG = False
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 ALLOWED_HOSTS = [
+    'shellbooks.app',
+    'www.shellbooks.app',
     'localhost',
     '127.0.0.1',
     'kod-psi.vercel.app',
     '.vercel.app',
-    'shellbooks.app',
-    'www.shellbooks.app',
 ]
 
 # Application definition
