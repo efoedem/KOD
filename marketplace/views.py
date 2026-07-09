@@ -76,10 +76,10 @@ def order_checkout(request, listing_id):
                 "customer_phone": phone,
                 "customer_name": form.cleaned_data['full_name'],
                 "callback_url": "https://kod-psi.vercel.app/checkout-success/",
-                "return_url": "https://shellboks.app/checkout-success/",
+                "return_url": "https://kod-psi.vercel.app/checkout-success/",
                 "reference": str(uuid.uuid4())
             }
-            
+
             headers = {"Authorization": f"Bearer {settings.SDVPAY_SECRET_KEY}", "Content-Type": "application/json"}
             response = requests.post("https://api.svdpay.com/api/v1/payments/initialize/", headers=headers,
                                      json=payload)
