@@ -57,7 +57,6 @@ def order_checkout(request, listing_id):
 
     # Define your dropdown lists
     levels = ["100", "200", "300", "400", "Postgraduate"]
-
     courses = [
         "BSc. Renewable Energy Engineering", "BSc. Petroleum Engineering",
         "BSc. Agricultural Engineering", "BSc. Electrical & Electronic Engineering",
@@ -116,18 +115,17 @@ def order_checkout(request, listing_id):
         }
 
         headers = {"Authorization": f"Bearer {settings.SDVPAY_SECRET_KEY}", "Content-Type": "application/json"}
+
+        # Make the request
         response = requests.post("https://api.svdpay.com/api/v1/payments/initialize/", headers=headers, json=payload)
 
-        if response.status_code == 200:
-            return redirect(response.json().get('data', {}).get('checkout_url'))
-        messages.error(request, "Payment initialization failed.")
-
+        # Single check for success or failure
         if response.status_code == 200:
             return redirect(response.json().get('data', {}).get('checkout_url'))
         else:
-            # This allows you to see the exact API rejection reason in your Vercel logs
-            print(f"API Error: {response.text}")
-            messages.error(request, f"Payment system error: {response.status_code}")
+            # Logs the error for debugging and shows a message to the user
+            print(f"API Error: {response.status_code} - {response.text}")
+            messages.error(request, f"Payment system error: {response.status_code}. Please try again.")
 
     return render(request, 'marketplace/checkout.html', {
         'listing': listing,
@@ -135,7 +133,6 @@ def order_checkout(request, listing_id):
         'courses': courses,
         'levels': levels
     })
-
 def checkout_success(request):
     reference = request.GET.get('ref') or request.GET.get('reference')
     listing_id = request.session.get('listing_id')
