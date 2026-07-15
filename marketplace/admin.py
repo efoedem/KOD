@@ -55,8 +55,8 @@ class ListingAdmin(admin.ModelAdmin):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 @admin.register(Order, site=marketplace_admin)
 class OrderAdmin(ImportExportModelAdmin):
-    list_display = ('listing_title', 'buyer_name', 'phone_number', 'email', 'school','status', 'created_at')
-    list_filter = ('listing__book__title','school', 'status', 'created_at')
+    list_display = ('listing_title', 'buyer_name', 'phone_number', 'school', 'level', 'course', 'status', 'created_at')
+    list_filter = ('listing__book__title','school', 'course', 'status', 'created_at')
 
     def listing_title(self, obj):
         return obj.listing.book.title
