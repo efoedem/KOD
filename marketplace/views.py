@@ -122,6 +122,13 @@ def order_checkout(request, listing_id):
             return redirect(response.json().get('data', {}).get('checkout_url'))
         messages.error(request, "Payment initialization failed.")
 
+        if response.status_code == 200:
+            return redirect(response.json().get('data', {}).get('checkout_url'))
+        else:
+            # This allows you to see the exact API rejection reason in your Vercel logs
+            print(f"API Error: {response.text}")
+            messages.error(request, f"Payment system error: {response.status_code}")
+
     return render(request, 'marketplace/checkout.html', {
         'listing': listing,
         'schools': School.objects.all(),
