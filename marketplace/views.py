@@ -55,6 +55,33 @@ def book_list(request):
 def order_checkout(request, listing_id):
     listing = get_object_or_404(Listing, id=listing_id)
 
+    # Define your dropdown lists
+    levels = ["100", "200", "300", "400", "Postgraduate"]
+
+    courses = [
+        "BSc. Renewable Energy Engineering", "BSc. Petroleum Engineering",
+        "BSc. Agricultural Engineering", "BSc. Electrical & Electronic Engineering",
+        "BSc. Computer Engineering", "BSc. Mechanical Engineering",
+        "BSc. Civil Engineering", "BSc. Environmental Engineering",
+        "BSc. Computer Science", "BSc. Information Technology",
+        "BSc. Nursing", "BSc. Medical Laboratory Sciences",
+        "BSc. Actuarial Science", "BSc. Statistics",
+        "BSc. Biological Science", "BSc. Biochemistry",
+        "BSc. Chemistry", "BSc. Mathematics",
+        "Diploma in Geoinformation Science", "Diploma in Geomatics",
+        "BSc Applied Meteorology and Climate Science", "BSc Climate Change and Sustainable Development",
+        "BSc Geo-Environmental Science", "BSc Geoinformation Science",
+        "BSc Geomatics", "BSc Planning and Sustainability",
+        "BSc Resource Enterprise & Entrepreneurship", "BSc. Accounting",
+        "BSc. Economics", "BSc Development Minerals Mining",
+        "BSc Urban Mining", "BSc Sustainable Mining",
+        "BSc Sustainable Land Management", "BSc Resource and Development Planning",
+        "Diploma Natural Resources Management", "Diploma Fire, Safety and Disaster Management",
+        "BSc Aquaculture and Aquatic Resources Management", "BSc Environmental Resources Management and Sustainability",
+        "BSc Fire, Safety and Disaster Management", "BSc Hospitality Management",
+        "BSc Natural Resources Management"
+    ]
+
     if request.method == 'POST':
         # Capture all form data
         form_data = {
@@ -97,7 +124,9 @@ def order_checkout(request, listing_id):
 
     return render(request, 'marketplace/checkout.html', {
         'listing': listing,
-        'schools': School.objects.all()  # Make sure to pass this for the dropdown
+        'schools': School.objects.all(),
+        'courses': courses,
+        'levels': levels
     })
 
 def checkout_success(request):
@@ -108,18 +137,22 @@ def checkout_success(request):
     if not reference or not listing_id or not checkout_data:
         return redirect('book_list')
 
-    # 1. Verify Payment
+    # Verification Logic...
     headers = {"Authorization": f"Bearer {settings.SDVPAY_SECRET_KEY}"}
     response = requests.get(f"https://api.svdpay.com/api/v1/payments/{reference}/verify/", headers=headers).json()
 
     if response.get('status') in [True, 'success']:
         listing = get_object_or_404(Listing, id=listing_id)
+
+        # Save the new fields here
         order = Order.objects.create(
             listing=listing,
             buyer_name=checkout_data['full_name'],
             phone_number=checkout_data['phone_number'],
-            email=checkout_data.get('email', ''),
-            quantity=checkout_data.get('quantity', 1),
+            school_id=checkout_data['school'],  # Saving the ID
+            level=checkout_data['level'],
+            course=checkout_data['course'],
+            quantity=checkout_data['quantity'],
             status='PAID'
         )
 

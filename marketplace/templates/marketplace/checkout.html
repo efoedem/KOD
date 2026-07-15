@@ -34,13 +34,23 @@
 <!-- Level -->
 <div class="mb-3">
     <label class="form-label fw-semibold">Level</label>
-    <input type="text" name="level" class="form-control form-control-lg bg-light" placeholder="e.g. 100, 200" required>
+    <select name="level" class="form-select form-select-lg bg-light" required>
+        <option value="" disabled selected>Select your level</option>
+        <option value="100">100</option>
+        <option value="200">200</option>
+        <option value="300">300</option>
+        <option value="400">400</option>
+    </select>
 </div>
 
-<!-- Course -->
 <div class="mb-3">
     <label class="form-label fw-semibold">Course</label>
-    <input type="text" name="course" class="form-control form-control-lg bg-light" required>
+    <select name="course" class="form-select form-select-lg bg-light" required>
+        <option value="" disabled selected>Select your course</option>
+        {% for course in courses %}
+            <option value="{{ course }}">{{ course }}</option>
+        {% endfor %}
+    </select>
 </div>
 
 <!-- Copies -->
