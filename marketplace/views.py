@@ -12,7 +12,7 @@ from django.core.mail import send_mail
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from twilio.rest import Client
-from .models import Order, Listing
+from .models import Order, Listing,School
 from .forms import CheckoutForm
 
 # --- Webhook Settings ---
@@ -54,41 +54,51 @@ def book_list(request):
 
 def order_checkout(request, listing_id):
     listing = get_object_or_404(Listing, id=listing_id)
+
     if request.method == 'POST':
-        form = CheckoutForm(request.POST)
-        if form.is_valid():
-            quantity = form.cleaned_data.get('quantity', 1)
-            phone = form.cleaned_data['phone_number']
+        # Capture all form data
+        form_data = {
+            'full_name': request.POST.get('full_name'),
+            'phone_number': request.POST.get('phone_number'),
+            'school': request.POST.get('school'),
+            'level': request.POST.get('level'),
+            'course': request.POST.get('course'),
+            'quantity': int(request.POST.get('quantity', 1))
+        }
 
-            # Normalize Phone for Twilio/API
-            if phone.startswith('0'):
-                phone = '+233' + phone[1:]
-            elif not phone.startswith('+'):
-                phone = '+' + phone
+        # Normalize Phone
+        phone = form_data['phone_number']
+        if phone.startswith('0'):
+            phone = '+233' + phone[1:]
+        elif not phone.startswith('+'):
+            phone = '+' + phone
+        form_data['phone_number'] = phone
 
-            request.session['checkout_info'] = {**form.cleaned_data, 'phone_number': phone}
-            request.session['listing_id'] = listing.id
+        request.session['checkout_info'] = form_data
+        request.session['listing_id'] = listing.id
 
-            payload = {
-                "amount": float(listing.price) * quantity,
-                "currency": "GHS",
-                "description": f"Payment for {quantity}x {listing.book.title}",
-                "customer_phone": phone,
-                "customer_name": form.cleaned_data['full_name'],
-                # Update to the main domain
-                "callback_url": "https://shellbooks.app/checkout-success/",
-                "return_url": "https://shellbooks.app/checkout-success/",
-                "reference": str(uuid.uuid4())
-            }
-            headers = {"Authorization": f"Bearer {settings.SDVPAY_SECRET_KEY}", "Content-Type": "application/json"}
-            response = requests.post("https://api.svdpay.com/api/v1/payments/initialize/", headers=headers,
-                                     json=payload)
+        payload = {
+            "amount": float(listing.price) * form_data['quantity'],
+            "currency": "GHS",
+            "description": f"Payment for {form_data['quantity']}x {listing.book.title}",
+            "customer_phone": phone,
+            "customer_name": form_data['full_name'],
+            "callback_url": "https://shellbooks.app/checkout-success/",
+            "return_url": "https://shellbooks.app/checkout-success/",
+            "reference": str(uuid.uuid4())
+        }
 
-            if response.status_code == 200:
-                return redirect(response.json().get('data', {}).get('checkout_url'))
-            messages.error(request, "Payment initialization failed.")
-    return render(request, 'marketplace/checkout.html', {'form': CheckoutForm(), 'listing': listing})
+        headers = {"Authorization": f"Bearer {settings.SDVPAY_SECRET_KEY}", "Content-Type": "application/json"}
+        response = requests.post("https://api.svdpay.com/api/v1/payments/initialize/", headers=headers, json=payload)
 
+        if response.status_code == 200:
+            return redirect(response.json().get('data', {}).get('checkout_url'))
+        messages.error(request, "Payment initialization failed.")
+
+    return render(request, 'marketplace/checkout.html', {
+        'listing': listing,
+        'schools': School.objects.all()  # Make sure to pass this for the dropdown
+    })
 
 def checkout_success(request):
     reference = request.GET.get('ref') or request.GET.get('reference')
