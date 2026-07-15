@@ -5,6 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d212c1d6-f8da-4a86-bd17-36e8c54d63f8" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marketplace/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/marketplace/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marketplace/templates/marketplace/checkout.html" beforeDir="false" afterPath="$PROJECT_DIR$/marketplace/templates/marketplace/checkout.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/marketplace/templates/marketplace/success.html" beforeDir="false" afterPath="$PROJECT_DIR$/marketplace/templates/marketplace/success.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

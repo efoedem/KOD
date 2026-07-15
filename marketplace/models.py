@@ -29,10 +29,21 @@ class Listing(models.Model):
     def formatted_price(self):
         """Returns the price formatted as Ghana Cedis."""
         return f"GH₵ {self.price}"
+
+
+class School(models.Model):
+    name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name
+
 class Order(models.Model):
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
     buyer_name = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=20)
+    school = models.ForeignKey(School, on_delete=models.SET_NULL, null=True)
+    level = models.CharField(max_length=50)
+    course = models.CharField(max_length=255)
     email = models.EmailField()
     status = models.CharField(max_length=20, default='PENDING')
     created_at = models.DateTimeField(auto_now_add=True)

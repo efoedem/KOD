@@ -1,6 +1,6 @@
 from django.contrib import admin
 from import_export.admin import ImportExportModelAdmin
-from .models import Book, Listing, Order, Profile
+from .models import Book, Listing, Order, Profile, School
 
 # 1. Define the custom Admin Site
 class MarketplaceAdminSite(admin.AdminSite):
@@ -55,8 +55,8 @@ class ListingAdmin(admin.ModelAdmin):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 @admin.register(Order, site=marketplace_admin)
 class OrderAdmin(ImportExportModelAdmin):
-    list_display = ('listing_title', 'buyer_name', 'phone_number', 'email', 'status', 'created_at')
-    list_filter = ('listing__book__title', 'status', 'created_at')
+    list_display = ('listing_title', 'buyer_name', 'phone_number', 'email', 'school','status', 'created_at')
+    list_filter = ('listing__book__title','school', 'status', 'created_at')
 
     def listing_title(self, obj):
         return obj.listing.book.title
@@ -71,3 +71,8 @@ class OrderAdmin(ImportExportModelAdmin):
 @admin.register(Profile, site=marketplace_admin)
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'full_name')
+
+    @admin.register(School, site=marketplace_admin)
+    class SchoolAdmin(admin.ModelAdmin):
+        list_display = ('name',)
+        search_fields = ('name',)
