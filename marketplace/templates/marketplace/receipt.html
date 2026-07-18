@@ -1,0 +1,31 @@
+<!-- marketplace/receipt.html -->
+<style>
+    /* Keep hidden on screen */
+    #receipt-content { display: none; }
+
+    @media print {
+        /* Hide entire page content */
+        body * { visibility: hidden; }
+        /* Make only the receipt visible */
+        #receipt-content, #receipt-content * { visibility: visible; }
+        #receipt-content {
+            display: block !important;
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+    }
+</style>
+
+<div id="receipt-content">
+    <h2 style="border-bottom: 1px solid #ccc;">Payment Receipt - BOOKMARKET</h2>
+    <p><strong>Order ID:</strong> {{ order.id }}</p>
+    <p><strong>Customer:</strong> {{ order.buyer_name }}</p>
+    <p><strong>Book:</strong> {{ order.listing.title }}</p>
+    <p><strong>Quantity:</strong> {{ order.quantity }}</p>
+    <p><strong>Total Paid:</strong> GHS {{ order.listing.price }}</p>
+    <p><em>Thank you for your purchase!</em></p>
+</div>
