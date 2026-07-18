@@ -13,9 +13,9 @@
                 <p class="text-muted">Your order is confirmed and will be ready in 3 days. We will coordinate with your course rep for delivery.</p>
 
                 <!-- Print Trigger Button -->
-                <button onclick="window.print()" class="btn btn-primary btn-lg mt-3 rounded-pill">
-                    <i class="bi bi-printer"></i> Print Receipt
-                </button>
+               <a href="{% url 'download_receipt' order.id %}" class="btn btn-primary btn-lg mt-3 rounded-pill">
+    <i class="bi bi-download"></i> Download Receipt
+</a>
 
                 <a href="{% url 'book_list' %}" id="shopLink" class="btn btn-outline-success btn-lg mt-3 rounded-pill">
                     Back to Shop (15s)

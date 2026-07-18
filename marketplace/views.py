@@ -13,7 +13,11 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from twilio.rest import Client
 from .models import Order, Listing,School
-from .forms import CheckoutForm
+from django.http import HttpResponse
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+from django.shortcuts import get_object_or_404
+from .models import Order
 
 # --- Webhook Settings ---
 SECRET = b"whsec_xxx"
@@ -182,3 +186,27 @@ def checkout_success(request):
         return render(request, 'marketplace/success.html', {'order': order})
 
     return render(request, 'marketplace/failed.html', {'error': 'Verification failed.'})
+
+
+
+def download_receipt(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+
+    # Calculate total price explicitly to pass to the template
+    total_price = order.listing.price * order.quantity
+
+    template_path = 'marketplace/receipt.html'
+    context = {'order': order, 'total_price': total_price}
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="Receipt_{order.order_id}.pdf"'
+
+    template = get_template(template_path)
+    html = template.render(context)
+
+    # Generate PDF
+    pisa_status = pisa.CreatePDF(html, dest=response)
+
+    if pisa_status.err:
+        return HttpResponse('We had some errors generating the PDF')
+    return response
