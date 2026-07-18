@@ -19,3 +19,4 @@ psycopg[binary]
 whitenoise
 gunicorn
 twilio
+xhtml2pdf
