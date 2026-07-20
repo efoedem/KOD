@@ -4,11 +4,11 @@
 <div class="module">
     <h2>Book Sales Dashboard</h2>
     <form method="GET">
-        <select name="book_id" onchange="this.form.submit()">
-            <option value="">Select a Book...</option>
-            {% for book in books %}
-                <option value="{{ book.id }}" {% if selected_book_id == book.id %}selected{% endif %}>
-                    {{ book.name }}
+        <select name="listing_id" onchange="this.form.submit()">
+            <option value="">Select a Listing...</option>
+            {% for listing in listings %}
+                <option value="{{ listing.id }}" {% if selected_listing_id == listing.id %}selected{% endif %}>
+                    {{ listing.book.title }} - GH₵ {{ listing.price }}
                 </option>
             {% endfor %}
         </select>
@@ -17,8 +17,10 @@
     {% if stats %}
     <div style="margin-top: 20px;">
         <p><strong>Total Orders:</strong> {{ stats.total_orders }}</p>
-        <p><strong>Total Revenue:</strong> ${{ stats.total_revenue|default:"0.00" }}</p>
+        <p><strong>Total Revenue:</strong> GH₵ {{ stats.total_revenue|default:"0.00" }}</p>
     </div>
+    {% elif selected_listing_id %}
+    <p>No sales recorded for this listing yet.</p>
     {% endif %}
 </div>
 {% endblock %}

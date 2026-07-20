@@ -203,21 +203,22 @@ def download_receipt(request, order_id):
     return response
 
 def order_stats_view(request):
-    books = Book.objects.all()
-    selected_book_id = request.GET.get('book_id')
+    listings = Listing.objects.all()
+    selected_listing_id = request.GET.get('listing_id')
     stats = None
 
-    if selected_book_id:
-        # Aggregate using the correct relationship: Order -> Listing -> Book
-        # Revenue is calculated as Listing Price * Quantity
-        stats = Order.objects.filter(listing__book_id=selected_book_id).aggregate(
+    if selected_listing_id and selected_listing_id.isdigit():
+        # Calculate stats for the specific listing
+        stats = Order.objects.filter(listing_id=int(selected_listing_id)).aggregate(
             total_orders=Count('id'),
-            total_revenue=Sum('listing__price') * Sum('quantity')
+            total_revenue=Sum('listing__price')  # Note: This assumes listing has price
         )
 
     context = {
-        'books': books,
-        'selected_book_id': int(selected_book_id) if selected_book_id else None,
-        'stats': stats
+        'listings': listings,  # CHANGED: Now passing listings
+        'selected_listing_id': int(selected_listing_id) if (
+                    selected_listing_id and selected_listing_id.isdigit()) else None,
+        'stats': stats,
+
     }
     return render(request, 'admin/order_stats.html', context)
