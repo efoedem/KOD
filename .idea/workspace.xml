@@ -6,33 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="d212c1d6-f8da-4a86-bd17-36e8c54d63f8" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marketplace/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/marketplace/admin.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/marketplace/apps.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/marketplace/forms.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/marketplace/migrations/0001_initial.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/marketplace/migrations/0002_listing_image.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/marketplace/migrations/0003_alter_listing_seller_order.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/marketplace/migrations/0004_profile.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/marketplace/migrations/0005_remove_order_buyer_order_buyer_name_order_email_and_more.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/marketplace/migrations/0006_order_quantity.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/marketplace/migrations/0007_book_added_by.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/marketplace/migrations/0008_school_order_course_order_level_order_school.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/marketplace/migrations/0009_order_rder_id.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/marketplace/migrations/0010_rename_rder_id_order_order_id.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/marketplace/migrations/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/marketplace/models.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/marketplace/templates/admin/order_stats.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/marketplace/templates/marketplace/base.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/marketplace/templates/marketplace/book_list.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/marketplace/templates/marketplace/checkout.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/marketplace/templates/marketplace/order/change_list.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/marketplace/templates/marketplace/payment.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/marketplace/templates/marketplace/receipt.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/marketplace/templates/marketplace/success.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/marketplace/tests.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/marketplace/urls.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/marketplace/views.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,30 +39,34 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;Python.views.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;SHELLCHECK.PATH&quot;: &quot;C:\\Users\\EDEM\\AppData\\Roaming\\JetBrains\\PyCharm2026.1\\plugins\\Shell Script\\shellcheck.exe&quot;,
-    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
-    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python.views.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "SHELLCHECK.PATH": "C:\\Users\\EDEM\\AppData\\Roaming\\JetBrains\\PyCharm2026.1\\plugins\\Shell Script\\shellcheck.exe",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "main",
+    "junie.onboarding.icon.badge.shown": "true",
+    "last_opened_file_path": "C:/Users/EDEM/PycharmProjects/PythonProject1",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "to.speed.mode.migration.done": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\EDEM\PycharmProjects\PythonProject1" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\EDEM\PycharmProjects\PythonProject1\marketplace\templates\admin" />
     </key>

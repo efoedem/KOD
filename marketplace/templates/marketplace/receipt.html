@@ -1,0 +1,62 @@
+<!-- marketplace/receipt.html -->
+<style>
+    /* Global Styles for PDF and Print */
+    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; line-height: 1.6; padding: 40px; }
+
+    /* Watermark */
+    .watermark { position: absolute; top: 30%; left: 10%; font-size: 100px; color: rgba(40, 167, 69, 0.08); transform: rotate(-45deg); z-index: -1; }
+
+    .receipt-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #28a745; padding-bottom: 20px; margin-bottom: 30px; }
+    .brand-name { font-size: 28px; font-weight: bold; color: #28a745; }
+    .paid-stamp { font-size: 24px; font-weight: bold; color: #28a745; border: 4px solid #28a745; padding: 5px 15px; transform: rotate(-5deg); }
+
+    .info-row { display: flex; margin-bottom: 10px; }
+    .info-label { width: 150px; font-weight: bold; }
+
+    .item-table { width: 100%; border-collapse: collapse; margin-bottom: 40px; }
+    .item-table th, .item-table td { text-align: left; padding: 12px; border-bottom: 1px solid #eee; }
+    .total-row td { font-weight: bold; font-size: 18px; }
+
+    .delivery-note { background-color: #f8f9fa; border-left: 4px solid #28a745; padding: 15px; margin-top: 30px; font-style: italic; }
+</style>
+
+<div id="receipt-content">
+    <div class="watermark">BOOKMARKET</div>
+    <div class="receipt-header">
+        <div>
+            <div class="brand-name">BOOKMARKET</div>
+            <div>www.shellbooks.app</div>
+        </div>
+        <div class="paid-stamp">PAID</div>
+    </div>
+
+    <div class="info-section">
+        <div class="info-row"><span class="info-label">Order ID:</span> <span>{{ order.order_id }}</span></div>
+        <div class="info-row"><span class="info-label">Customer:</span> <span>{{ order.buyer_name }}</span></div>
+        <div class="info-row"><span class="info-label">Phone:</span> <span>{{ order.phone_number }}</span></div>
+        <div class="info-row"><span class="info-label">Date:</span> <span>{{ order.created_at|date:"F j, Y, g:i a" }}</span></div>
+    </div>
+
+    <table class="item-table">
+        <thead>
+            <tr><th>Book Title</th><th>Qty</th><th>Price</th><th>Total</th></tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ order.listing.book.title }}</td>
+                <td>{{ order.quantity }}</td>
+                <td>GHS {{ order.listing.price }}</td>
+                <td>GHS {{ total_price|floatformat:2 }}</td>
+            </tr>
+            <tr class="total-row">
+                <td colspan="3" style="text-align: right;">Grand Total:</td>
+                <td>GHS {{ total_price|floatformat:2 }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="delivery-note">
+        <strong>Delivery Information:</strong> Your order will be ready in 3 days via your course rep.
+        Questions? Whatsapp 0558359314.
+    </div>
+</div>

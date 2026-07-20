@@ -13,4 +13,7 @@ urlpatterns = [
 
     # 3. SvdPay Webhook
     path('webhook/svdpay/', views.svdpay_webhook, name='svdpay_webhook'),
+
+    path('receipt/download/<int:order_id>/', views.download_receipt, name='download_receipt'),
+
 ]

@@ -1,24 +1,40 @@
 {% extends 'marketplace/base.html' %}
 {% block content %}
+
+<!-- Include the receipt template here -->
+{% include 'marketplace/receipt.html' %}
+
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-11 col-sm-8 col-md-6">
             <div class="card shadow-sm border-0 p-5 rounded-4 text-center">
                 <i class="bi bi-check-circle-fill text-success mb-3" style="font-size: 4rem;"></i>
                 <h1 class="fw-bold mb-3">Order Successful!</h1>
-                <p class="text-muted">Your order is confirmed and will be ready in 3 days.</p>
-                <a href="{% url 'book_list' %}" id="shopLink" class="btn btn-outline-success btn-lg mt-3 rounded-pill">Back to Shop (5s)</a>
+                <p class="text-muted">Your order is confirmed and will be ready in 3 days. We will coordinate with your course rep for delivery.</p>
+
+                <!-- Print Trigger Button -->
+               <a href="{% url 'download_receipt' order.id %}" class="btn btn-primary btn-lg mt-3 rounded-pill">
+    <i class="bi bi-download"></i> Download Receipt
+</a>
+
+                <a href="{% url 'book_list' %}" id="shopLink" class="btn btn-outline-success btn-lg mt-3 rounded-pill">
+                    Back to Shop (15s)
+                </a>
             </div>
         </div>
     </div>
 </div>
+
 <script>
-    let seconds = 10;
+    let seconds = 15;
     const link = document.getElementById('shopLink');
-    setInterval(() => {
+    const timer = setInterval(() => {
         seconds--;
         link.innerText = `Back to Shop (${seconds}s)`;
-        if (seconds <= 0) window.location.href = "{% url 'book_list' %}";
+        if (seconds <= 0) {
+            clearInterval(timer);
+            window.location.href = "{% url 'book_list' %}";
+        }
     }, 1000);
 </script>
 {% endblock %}
