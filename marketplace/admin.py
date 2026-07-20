@@ -58,8 +58,12 @@ class ListingAdmin(admin.ModelAdmin):
             obj.seller = request.user
         super().save_model(request, obj, form, change)
 
+
 @admin.register(Order, site=marketplace_admin)
 class OrderAdmin(ImportExportModelAdmin):
+    # This path tells Django to use your custom template with the button
+    change_list_template = 'marketplace/order/change_list.html'
+
     list_display = ('listing_title', 'buyer_name', 'phone_number', 'school', 'level', 'course', 'status', 'created_at')
     list_filter = ('listing__book__title', 'school', 'course', 'status', 'created_at')
 
@@ -70,6 +74,7 @@ class OrderAdmin(ImportExportModelAdmin):
         urls = super().get_urls()
         from django.urls import path
         custom_urls = [
+            # This path matches the button URL in your change_list.html
             path('stats/', self.admin_site.admin_view(order_stats_view), name='order-stats'),
         ]
         return custom_urls + urls
