@@ -1,8 +1,11 @@
 from django.contrib import admin
+from django.urls import path
+from django.shortcuts import render
+from django.db.models import Count, Sum
 from import_export.admin import ImportExportModelAdmin
 from .models import Book, Listing, Order, Profile, School
 
-# 1. Define the custom Admin Site
+# 1. Define the Custom Admin Site
 class MarketplaceAdminSite(admin.AdminSite):
     site_header = 'Marketplace Administration'
     site_title = 'Marketplace Admin'
@@ -14,18 +17,31 @@ class MarketplaceAdminSite(admin.AdminSite):
 # 2. Instantiate the custom site
 marketplace_admin = MarketplaceAdminSite(name='marketplace_admin')
 
-# 3. Define and Register all models using decorators
-# This approach ensures models are registered exactly once to the custom site.
+# 3. Custom Dashboard View
+def order_stats_view(request):
+    books = Book.objects.all()
+    selected_book_id = request.GET.get('book_id')
+    stats = None
 
+    if selected_book_id:
+        stats = Order.objects.filter(listing__book_id=selected_book_id).aggregate(
+            total_orders=Count('id'),
+            # Ensure your Order model has a 'price' field; if it's on Listing, use 'listing__price'
+            total_revenue=Sum('listing__price')
+        )
+
+    context = {
+        'books': books,
+        'selected_book_id': int(selected_book_id) if selected_book_id else None,
+        'stats': stats,
+        **marketplace_admin.each_context(request), # Ensures admin CSS/JS loads
+    }
+    return render(request, 'admin/order_stats.html', context)
+
+# 4. Model Registrations
 @admin.register(Book, site=marketplace_admin)
 class BookAdmin(admin.ModelAdmin):
     list_display = ('title', 'author', 'added_by')
-
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        if request.user.is_superuser:
-            return qs
-        return qs.filter(added_by=request.user)
 
     def save_model(self, request, obj, form, change):
         if not obj.pk:
@@ -42,37 +58,26 @@ class ListingAdmin(admin.ModelAdmin):
             obj.seller = request.user
         super().save_model(request, obj, form, change)
 
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        if request.user.is_superuser:
-            return qs
-        return qs.filter(seller=request.user)
-
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == "book" and not request.user.is_superuser:
-            # Only show books added by the current user
-            kwargs["queryset"] = Book.objects.filter(added_by=request.user)
-        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 @admin.register(Order, site=marketplace_admin)
 class OrderAdmin(ImportExportModelAdmin):
     list_display = ('listing_title', 'buyer_name', 'phone_number', 'school', 'level', 'course', 'status', 'created_at')
-    list_filter = ('listing__book__title','school', 'course', 'status', 'created_at')
+    list_filter = ('listing__book__title', 'school', 'course', 'status', 'created_at')
 
     def listing_title(self, obj):
         return obj.listing.book.title
 
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        # Superusers can see all orders
-        if request.user.is_superuser:
-            return qs
-        # Filter orders where the book associated with the listing was added by the current user
-        return qs.filter(listing__book__added_by=request.user)
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path('stats/', self.admin_site.admin_view(order_stats_view), name='order-stats'),
+        ]
+        return custom_urls + urls
+
 @admin.register(Profile, site=marketplace_admin)
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'full_name')
 
-    @admin.register(School, site=marketplace_admin)
-    class SchoolAdmin(admin.ModelAdmin):
-        list_display = ('name',)
-        search_fields = ('name',)
+@admin.register(School, site=marketplace_admin)
+class SchoolAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+    search_fields = ('name',)

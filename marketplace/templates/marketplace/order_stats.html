@@ -1,0 +1,24 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<div class="module">
+    <h2>Book Sales Dashboard</h2>
+    <form method="GET">
+        <select name="book_id" onchange="this.form.submit()">
+            <option value="">Select a Book...</option>
+            {% for book in books %}
+                <option value="{{ book.id }}" {% if selected_book_id == book.id %}selected{% endif %}>
+                    {{ book.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </form>
+
+    {% if stats %}
+    <div style="margin-top: 20px;">
+        <p><strong>Total Orders:</strong> {{ stats.total_orders }}</p>
+        <p><strong>Total Revenue:</strong> ${{ stats.total_revenue|default:"0.00" }}</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -10,18 +10,15 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.conf import settings
 from django.core.mail import send_mail
 from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
-from twilio.rest import Client
-from .models import Order, Listing,School
-from django.http import HttpResponse
+from django.http import JsonResponse, HttpResponse
 from django.template.loader import get_template
+from django.db.models import Count, Sum
+from twilio.rest import Client
 from xhtml2pdf import pisa
-from django.shortcuts import get_object_or_404
-from .models import Order
+from .models import Order, Listing, School, Book
 
 # --- Webhook Settings ---
 SECRET = b"whsec_xxx"
-
 
 def verify_webhook_signature(sig_header, body):
     try:
@@ -33,7 +30,6 @@ def verify_webhook_signature(sig_header, body):
         return hmac.compare_digest(expected, sig)
     except Exception:
         return False
-
 
 @csrf_exempt
 def svdpay_webhook(request):
@@ -93,6 +89,7 @@ def order_checkout(request, listing_id):
             'school': request.POST.get('school'),
             'level': request.POST.get('level'),
             'course': request.POST.get('course'),
+            'email': request.POST.get('email'),
             'quantity': int(request.POST.get('quantity', 1))
         }
 
@@ -127,7 +124,6 @@ def order_checkout(request, listing_id):
         if response.status_code == 200:
             return redirect(response.json().get('data', {}).get('checkout_url'))
         else:
-            # Logs the error for debugging and shows a message to the user
             print(f"API Error: {response.status_code} - {response.text}")
             messages.error(request, f"Payment system error: {response.status_code}. Please try again.")
 
@@ -137,6 +133,7 @@ def order_checkout(request, listing_id):
         'courses': courses,
         'levels': levels
     })
+
 def checkout_success(request):
     reference = request.GET.get('ref') or request.GET.get('reference')
     listing_id = request.session.get('listing_id')
@@ -145,19 +142,20 @@ def checkout_success(request):
     if not reference or not listing_id or not checkout_data:
         return redirect('book_list')
 
-    # Verification Logic...
+    # Verification Logic
     headers = {"Authorization": f"Bearer {settings.SDVPAY_SECRET_KEY}"}
     response = requests.get(f"https://api.svdpay.com/api/v1/payments/{reference}/verify/", headers=headers).json()
 
     if response.get('status') in [True, 'success']:
         listing = get_object_or_404(Listing, id=listing_id)
 
-        # Save the new fields here
+        # Save the new fields
         order = Order.objects.create(
             listing=listing,
             buyer_name=checkout_data['full_name'],
             phone_number=checkout_data['phone_number'],
-            school_id=checkout_data['school'],  # Saving the ID
+            email=checkout_data['email'],
+            school_id=checkout_data['school'],
             level=checkout_data['level'],
             course=checkout_data['course'],
             quantity=checkout_data['quantity'],
@@ -187,26 +185,39 @@ def checkout_success(request):
 
     return render(request, 'marketplace/failed.html', {'error': 'Verification failed.'})
 
-
-
 def download_receipt(request, order_id):
     order = get_object_or_404(Order, id=order_id)
-
-    # Calculate total price explicitly to pass to the template
     total_price = order.listing.price * order.quantity
-
-    template_path = 'marketplace/receipt.html'
     context = {'order': order, 'total_price': total_price}
 
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="Receipt_{order.order_id}.pdf"'
 
-    template = get_template(template_path)
+    template = get_template('marketplace/receipt.html')
     html = template.render(context)
 
     # Generate PDF
     pisa_status = pisa.CreatePDF(html, dest=response)
-
     if pisa_status.err:
         return HttpResponse('We had some errors generating the PDF')
     return response
+
+def order_stats_view(request):
+    books = Book.objects.all()
+    selected_book_id = request.GET.get('book_id')
+    stats = None
+
+    if selected_book_id:
+        # Aggregate using the correct relationship: Order -> Listing -> Book
+        # Revenue is calculated as Listing Price * Quantity
+        stats = Order.objects.filter(listing__book_id=selected_book_id).aggregate(
+            total_orders=Count('id'),
+            total_revenue=Sum('listing__price') * Sum('quantity')
+        )
+
+    context = {
+        'books': books,
+        'selected_book_id': int(selected_book_id) if selected_book_id else None,
+        'stats': stats
+    }
+    return render(request, 'admin/order_stats.html', context)
