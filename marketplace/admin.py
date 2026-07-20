@@ -1,7 +1,8 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, reverse
 from django.shortcuts import render
 from django.db.models import Count, Sum
+from django.utils.html import format_html
 from import_export.admin import ImportExportModelAdmin
 from .models import Book, Listing, Order, Profile, School
 
@@ -26,7 +27,6 @@ def order_stats_view(request):
     if selected_book_id:
         stats = Order.objects.filter(listing__book_id=selected_book_id).aggregate(
             total_orders=Count('id'),
-            # Ensure your Order model has a 'price' field; if it's on Listing, use 'listing__price'
             total_revenue=Sum('listing__price')
         )
 
@@ -34,7 +34,7 @@ def order_stats_view(request):
         'books': books,
         'selected_book_id': int(selected_book_id) if selected_book_id else None,
         'stats': stats,
-        **marketplace_admin.each_context(request), # Ensures admin CSS/JS loads
+        **marketplace_admin.each_context(request),
     }
     return render(request, 'admin/order_stats.html', context)
 
@@ -60,11 +60,17 @@ class ListingAdmin(admin.ModelAdmin):
 
 @admin.register(Order, site=marketplace_admin)
 class OrderAdmin(ImportExportModelAdmin):
-    list_display = ('listing_title', 'buyer_name', 'phone_number', 'school', 'level', 'course', 'status', 'created_at')
+    list_display = ('listing_title', 'buyer_name', 'phone_number', 'school', 'level', 'course', 'status', 'created_at', 'stats_button')
     list_filter = ('listing__book__title', 'school', 'course', 'status', 'created_at')
 
     def listing_title(self, obj):
         return obj.listing.book.title
+
+    # Adds a button to the list view to navigate to stats
+    def stats_button(self, obj):
+        url = reverse('marketplace_admin:order-stats')
+        return format_html('<a class="button" href="{}">View Stats</a>', url)
+    stats_button.short_description = "Dashboard"
 
     def get_urls(self):
         urls = super().get_urls()

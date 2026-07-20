@@ -4,12 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d212c1d6-f8da-4a86-bd17-36e8c54d63f8" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/marketplace/templates/marketplace/order_stats.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marketplace/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/marketplace/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marketplace/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/marketplace/views.py" afterDir="false" />
-    </list>
+    <list default="true" id="d212c1d6-f8da-4a86-bd17-36e8c54d63f8" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
