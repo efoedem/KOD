@@ -1,8 +1,0 @@
-{% extends "admin/change_list.html" %}
-
-{% block object-tools-items %}
-    <li>
-        <a href="{% url 'marketplace_admin:order-stats' %}" class="button">View Stats</a>
-    </li>
-    {{ block.super }}
-{% endblock %}

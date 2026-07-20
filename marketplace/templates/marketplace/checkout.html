@@ -8,58 +8,18 @@
                     <h2 class="text-center fw-bold mb-4">Checkout Details</h2>
                     <form method="POST">
                         {% csrf_token %}
-
-                        <!-- Full Name -->
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Full Name</label>
                             <input type="text" name="full_name" class="form-control form-control-lg bg-light" required>
                         </div>
-
-                        <!-- Phone Number -->
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Phone Number</label>
                             <input type="tel" name="phone_number" class="form-control form-control-lg bg-light" required>
                         </div>
-
-                        <!-- School -->
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">School</label>
-                            <select name="school" class="form-select form-select-lg bg-light" required>
-                                <option value="" disabled selected>Select your school</option>
-                                {% for school in schools %}
-                                    <option value="{{ school.id }}">{{ school.name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
-                        <!-- Level -->
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Level</label>
-                            <select name="level" class="form-select form-select-lg bg-light" required>
-                                <option value="" disabled selected>Select your level</option>
-                                {% for level in levels %}
-                                    <option value="{{ level }}">{{ level }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
-                        <!-- Course -->
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Course</label>
-                            <select name="course" class="form-select form-select-lg bg-light" required>
-                                <option value="" disabled selected>Select your course</option>
-                                {% for course in courses %}
-                                    <option value="{{ course }}">{{ course }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
-                        <!-- Copies -->
                         <div class="mb-4">
                             <label class="form-label fw-semibold">Copies</label>
                             <input type="number" name="quantity" class="form-control form-control-lg bg-light" value="1" min="1" max="10" required>
                         </div>
-
                         <button type="submit" class="btn btn-success btn-lg w-100 rounded-pill">Continue to Payment</button>
                     </form>
                 </div>
