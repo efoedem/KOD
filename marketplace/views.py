@@ -15,7 +15,8 @@ from django.template.loader import get_template
 from django.db.models import Count, Sum
 from twilio.rest import Client
 from xhtml2pdf import pisa
-from .models import Order, Listing, School, Book
+from .models import Order, Listing, School
+from .admin import marketplace_admin
 
 # --- Webhook Settings ---
 SECRET = b"whsec_xxx"
@@ -202,23 +203,18 @@ def download_receipt(request, order_id):
         return HttpResponse('We had some errors generating the PDF')
     return response
 
+
 def order_stats_view(request):
     listings = Listing.objects.all()
-    selected_listing_id = request.GET.get('listing_id')
-    stats = None
+    # This print statement will show up in your terminal/Vercel logs
+    print(f"DEBUG: Found {listings.count()} total listings.")
 
-    if selected_listing_id and selected_listing_id.isdigit():
-        # Calculate stats for the specific listing
-        stats = Order.objects.filter(listing_id=int(selected_listing_id)).aggregate(
-            total_orders=Count('id'),
-            total_revenue=Sum('listing__price')  # Note: This assumes listing has price
-        )
+    selected_listing_id = request.GET.get('listing_id')
 
     context = {
-        'listings': listings,  # CHANGED: Now passing listings
+        'listings': listings,
         'selected_listing_id': int(selected_listing_id) if (
                     selected_listing_id and selected_listing_id.isdigit()) else None,
-        'stats': stats,
-
+        **marketplace_admin.each_context(request),
     }
-    return render(request, 'admin/order_stats.html', context)
+    return render(request, 'marketplace/order_stats.html', context)
