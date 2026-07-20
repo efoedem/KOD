@@ -203,18 +203,24 @@ def download_receipt(request, order_id):
         return HttpResponse('We had some errors generating the PDF')
     return response
 
+from django.contrib import admin # Use default admin for context
+from django.db.models import F
 
 def order_stats_view(request):
     listings = Listing.objects.all()
-    # This print statement will show up in your terminal/Vercel logs
-    print(f"DEBUG: Found {listings.count()} total listings.")
-
     selected_listing_id = request.GET.get('listing_id')
+    stats = None
+
+    if selected_listing_id and selected_listing_id.isdigit():
+        stats = Order.objects.filter(listing_id=int(selected_listing_id)).aggregate(
+            total_orders=Count('id'),
+            total_revenue=Sum(F('listing__price') * F('quantity'))
+        )
 
     context = {
         'listings': listings,
-        'selected_listing_id': int(selected_listing_id) if (
-                    selected_listing_id and selected_listing_id.isdigit()) else None,
-        **marketplace_admin.each_context(request),
+        'selected_listing_id': int(selected_listing_id) if (selected_listing_id and selected_listing_id.isdigit()) else None,
+        'stats': stats,
+        **admin.site.each_context(request), # Use default admin site context
     }
     return render(request, 'marketplace/order_stats.html', context)

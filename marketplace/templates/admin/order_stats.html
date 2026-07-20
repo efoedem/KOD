@@ -10,17 +10,20 @@
                 <option value="{{ listing.id }}" {% if selected_listing_id == listing.id %}selected{% endif %}>
                     {{ listing.book.title }} - GH₵ {{ listing.price }}
                 </option>
+            {% empty %}
+                <option value="">No listings found!</option>
             {% endfor %}
         </select>
     </form>
 
+    <!-- DEBUG: This will tell us if the variable is empty -->
+    <p>Debug: Total listings passed to template = {{ listings|length }}</p>
+
     {% if stats %}
-    <div style="margin-top: 20px;">
-        <p><strong>Total Orders:</strong> {{ stats.total_orders }}</p>
-        <p><strong>Total Revenue:</strong> GH₵ {{ stats.total_revenue|default:"0.00" }}</p>
-    </div>
-    {% elif selected_listing_id %}
-    <p>No sales recorded for this listing yet.</p>
+        <div style="margin-top: 20px;">
+            <p><strong>Total Orders:</strong> {{ stats.total_orders }}</p>
+            <p><strong>Total Revenue:</strong> GH₵ {{ stats.total_revenue|default:"0.00" }}</p>
+        </div>
     {% endif %}
 </div>
 {% endblock %}
