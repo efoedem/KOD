@@ -60,20 +60,15 @@ class ListingAdmin(admin.ModelAdmin):
 
 @admin.register(Order, site=marketplace_admin)
 class OrderAdmin(ImportExportModelAdmin):
-    list_display = ('listing_title', 'buyer_name', 'phone_number', 'school', 'level', 'course', 'status', 'created_at', 'stats_button')
+    list_display = ('listing_title', 'buyer_name', 'phone_number', 'school', 'level', 'course', 'status', 'created_at')
     list_filter = ('listing__book__title', 'school', 'course', 'status', 'created_at')
 
     def listing_title(self, obj):
         return obj.listing.book.title
 
-    # Adds a button to the list view to navigate to stats
-    def stats_button(self, obj):
-        url = reverse('marketplace_admin:order-stats')
-        return format_html('<a class="button" href="{}">View Stats</a>', url)
-    stats_button.short_description = "Dashboard"
-
     def get_urls(self):
         urls = super().get_urls()
+        from django.urls import path
         custom_urls = [
             path('stats/', self.admin_site.admin_view(order_stats_view), name='order-stats'),
         ]
