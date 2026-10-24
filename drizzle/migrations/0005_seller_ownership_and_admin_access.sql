@@ -1,6 +1,6 @@
 ALTER TABLE public.books ADD COLUMN uploaded_by uuid;
 ALTER TABLE public.order_items ADD COLUMN seller_id uuid;
-UPDATE public.books SET uploaded_by = (SELECT id FROM auth.users WHERE lower(email) = 'edemofficial@gmail.com' AND email_confirmed_at IS NOT NULL LIMIT 1);
+UPDATE public.books SET uploaded_by = (SELECT id FROM auth.users WHERE lower(email) = 'edemkofficial@gmail.com' AND email_confirmed_at IS NOT NULL LIMIT 1);
 UPDATE public.order_items i SET seller_id = b.uploaded_by FROM public.books b WHERE b.id = i.book_id;
 CREATE INDEX books_uploaded_by_idx ON public.books(uploaded_by);
 CREATE INDEX order_items_seller_idx ON public.order_items(seller_id);
@@ -17,7 +17,7 @@ CREATE POLICY "super admin invitations" ON public.admin_invitations FOR ALL TO a
 CREATE OR REPLACE FUNCTION public.grant_owner_admin() RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 BEGIN
  IF NEW.email_confirmed_at IS NOT NULL THEN
-  IF lower(NEW.email) = 'edemofficial@gmail.com' THEN
+  IF lower(NEW.email) = 'edemkofficial@gmail.com' THEN
    INSERT INTO public.user_roles(user_id, role) VALUES (NEW.id, 'super_admin'), (NEW.id, 'admin') ON CONFLICT DO NOTHING;
    UPDATE public.books SET uploaded_by = NEW.id WHERE uploaded_by IS NULL;
    UPDATE public.order_items SET seller_id = NEW.id WHERE seller_id IS NULL;

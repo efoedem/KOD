@@ -6,7 +6,7 @@ SET search_path = public
 AS $$
 BEGIN
   IF NEW.email_confirmed_at IS NOT NULL
-     AND lower(NEW.email) = 'edemofficial@gmail.com' THEN
+     AND lower(NEW.email) = 'edemkofficial@gmail.com' THEN
     INSERT INTO public.user_roles (user_id, role)
     VALUES (NEW.id, 'admin')
     ON CONFLICT (user_id, role) DO NOTHING;
@@ -29,5 +29,5 @@ EXECUTE FUNCTION public.grant_owner_admin();
 
 INSERT INTO public.user_roles (user_id, role)
 SELECT id, 'admin' FROM auth.users
-WHERE lower(email) = 'edemofficial@gmail.com' AND email_confirmed_at IS NOT NULL
+WHERE lower(email) = 'edemkofficial@gmail.com' AND email_confirmed_at IS NOT NULL
 ON CONFLICT (user_id, role) DO NOTHING;
