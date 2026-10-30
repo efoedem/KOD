@@ -1,0 +1,1 @@
+DO $$ DECLARE definition text; BEGIN SELECT pg_get_functiondef('public.telegram_bot_action(bigint,bigint,bigint,jsonb)'::regprocedure) INTO definition; definition := replace(definition, 'PERFORM pg_advisory_xact_lock(_update);', 'PERFORM pg_advisory_xact_lock(_telegram); PERFORM pg_advisory_xact_lock(_update);'); EXECUTE definition; END $$;
